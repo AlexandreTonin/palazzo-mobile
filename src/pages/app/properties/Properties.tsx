@@ -61,18 +61,26 @@ const Tab1: React.FC = () => {
       setLoading(true);
       setError(null);
 
-      const response = await propertiesService.getAll({
-        type: selectedType,
-        search: searchQuery || undefined,
-        page: 1,
-        limit: 6,
-      });
-      setProperties(response.data);
-      setCurrentPage(1);
-      setHasMore(
-        response.pagination.currentPage < response.pagination.totalPages
-      );
-      setLoading(false);
+      try {
+        const response = await propertiesService.getAll({
+          type: selectedType,
+          search: searchQuery || undefined,
+          page: 1,
+          limit: 6,
+        });
+        setProperties(response.data || []);
+        setCurrentPage(1);
+        setHasMore(
+          response.pagination?.currentPage < response.pagination?.totalPages
+        );
+      } catch (err) {
+        console.error('Erro ao buscar propriedades:', err);
+        setError('Erro ao carregar imóveis');
+        setProperties([]);
+        setHasMore(false);
+      } finally {
+        setLoading(false);
+      }
     };
 
     fetchProperties();
@@ -106,13 +114,18 @@ const Tab1: React.FC = () => {
         limit: 6,
       });
 
-      setProperties((prev) => [...prev, ...response.data]);
-      setCurrentPage(nextPage);
-      setHasMore(
-        response.pagination.currentPage < response.pagination.totalPages
-      );
+      if (response.data && response.data.length > 0) {
+        setProperties((prev) => [...prev, ...response.data]);
+        setCurrentPage(nextPage);
+        setHasMore(
+          response.pagination?.currentPage < response.pagination?.totalPages
+        );
+      } else {
+        setHasMore(false);
+      }
     } catch (error) {
       console.error('Erro ao carregar mais propriedades:', error);
+      setHasMore(false);
     } finally {
       (event.target as HTMLIonInfiniteScrollElement).complete();
     }
