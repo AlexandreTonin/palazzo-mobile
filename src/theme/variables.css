@@ -2,4 +2,5 @@
 http://ionicframework.com/docs/theming/ */
 :root {
   --ion-color-primary: #000;
+  --ion-toolbar-background: #fff;
 }
