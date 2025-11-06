@@ -1,5 +1,7 @@
 import {
   IonContent,
+  IonInfiniteScroll,
+  IonInfiniteScrollContent,
   IonList,
   IonPage,
   IonSearchbar,
@@ -26,6 +28,8 @@ const Tab1: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [favoriteIds, setFavoriteIds] = useState<number[]>([]);
   const [loadingFavorites, setLoadingFavorites] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
 
   useEffect(() => {
     const checkAuthAndFetchFavorites = async () => {
@@ -60,8 +64,14 @@ const Tab1: React.FC = () => {
       const response = await propertiesService.getAll({
         type: selectedType,
         search: searchQuery || undefined,
+        page: 1,
+        limit: 6,
       });
       setProperties(response.data);
+      setCurrentPage(1);
+      setHasMore(
+        response.pagination.currentPage < response.pagination.totalPages
+      );
       setLoading(false);
     };
 
@@ -83,6 +93,28 @@ const Tab1: React.FC = () => {
       setFavoriteIds((prev) => [...prev, propertyId]);
     } else {
       setFavoriteIds((prev) => prev.filter((id) => id !== propertyId));
+    }
+  };
+
+  const loadMore = async (event: CustomEvent<void>) => {
+    try {
+      const nextPage = currentPage + 1;
+      const response = await propertiesService.getAll({
+        type: selectedType,
+        search: searchQuery || undefined,
+        page: nextPage,
+        limit: 6,
+      });
+
+      setProperties((prev) => [...prev, ...response.data]);
+      setCurrentPage(nextPage);
+      setHasMore(
+        response.pagination.currentPage < response.pagination.totalPages
+      );
+    } catch (error) {
+      console.error('Erro ao carregar mais propriedades:', error);
+    } finally {
+      (event.target as HTMLIonInfiniteScrollElement).complete();
     }
   };
 
@@ -119,19 +151,32 @@ const Tab1: React.FC = () => {
         {error && <p>Erro ao carregar imóveis: {error}</p>}
 
         {!loadingFavorites && (
-          <IonList
-            lines="none"
-            style={{ paddingBlockEnd: '80px', paddingBlockStart: 0 }}
-          >
-            {properties.map((property) => (
-              <PropertyCard
-                key={property.id}
-                property={property}
-                initialIsFavorited={favoriteIds.includes(property.id)}
-                onFavoriteToggle={handleFavoriteToggle}
+          <>
+            <IonList
+              lines="none"
+              style={{ paddingBlockEnd: '80px', paddingBlockStart: 0 }}
+            >
+              {properties.map((property) => (
+                <PropertyCard
+                  key={property.id}
+                  property={property}
+                  initialIsFavorited={favoriteIds.includes(property.id)}
+                  onFavoriteToggle={handleFavoriteToggle}
+                />
+              ))}
+            </IonList>
+
+            <IonInfiniteScroll
+              onIonInfinite={loadMore}
+              threshold="100px"
+              disabled={!hasMore}
+            >
+              <IonInfiniteScrollContent
+                loadingSpinner="crescent"
+                loadingText="Carregando mais imóveis..."
               />
-            ))}
-          </IonList>
+            </IonInfiniteScroll>
+          </>
         )}
       </IonContent>
     </IonPage>
