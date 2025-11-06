@@ -19,6 +19,8 @@ export interface Property {
   images: PropertyImage[];
   contactPhone: string;
   contactEmail: string;
+  latitude: number | null;
+  longitude: number | null;
   createdAt: string;
   updatedAt: string;
 }
