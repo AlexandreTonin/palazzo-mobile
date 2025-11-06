@@ -1,8 +1,8 @@
 import apiClient from './apiClient';
-import { Property } from '../types/property';
+import { Favorite } from '../types/property';
 
 const favoritesService = {
-  getAll: async (): Promise<Property[]> => {
+  getAll: async (): Promise<Favorite[]> => {
     const response = await apiClient.get('/favorites');
     return response.data;
   },

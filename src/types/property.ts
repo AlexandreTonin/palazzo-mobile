@@ -23,6 +23,15 @@ export interface Property {
   updatedAt: string;
 }
 
+export interface Favorite {
+  id: number;
+  userId: number;
+  listingId: number;
+  createdAt: string;
+  updatedAt: string;
+  listing: Property;
+}
+
 export interface PropertiesResponse {
   data: Property[];
   pagination: {
