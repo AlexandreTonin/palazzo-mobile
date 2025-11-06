@@ -22,3 +22,8 @@
 .tab-bar-tab {
   background: transparent;
 }
+
+.toolbar {
+  --padding-start: 12px;
+  --padding-end: 12px;
+}
