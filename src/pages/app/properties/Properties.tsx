@@ -18,19 +18,36 @@ const Tab1: React.FC = () => {
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  const fetchProperties = async () => {
-    setLoading(true);
-    setError(null);
-
-    const response = await propertiesService.getAll();
-    setProperties(response.data);
-    setLoading(false);
-  };
+  const [selectedType, setSelectedType] = useState<
+    'house' | 'apartment' | 'penthouse' | 'loft' | undefined
+  >();
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
+    const fetchProperties = async () => {
+      setLoading(true);
+      setError(null);
+
+      const response = await propertiesService.getAll({
+        type: selectedType,
+        search: searchQuery || undefined,
+      });
+      setProperties(response.data);
+      setLoading(false);
+    };
+
     fetchProperties();
-  }, []);
+  }, [selectedType, searchQuery]);
+
+  const handleFilterChange = (
+    type?: 'house' | 'apartment' | 'penthouse' | 'loft'
+  ) => {
+    setSelectedType(type);
+  };
+
+  const handleSearchChange = (value: string) => {
+    setSearchQuery(value);
+  };
 
   return (
     <IonPage>
@@ -44,9 +61,16 @@ const Tab1: React.FC = () => {
         <IonSearchbar
           placeholder="Pesquisar imóveis"
           className="ion-no-padding ion-no-margin"
+          debounce={500}
+          value={searchQuery}
+          onIonInput={(e) => handleSearchChange(e.detail.value || '')}
+          onIonClear={() => handleSearchChange('')}
         ></IonSearchbar>
 
-        <PropertyFilter />
+        <PropertyFilter
+          selectedType={selectedType}
+          onFilterChange={handleFilterChange}
+        />
       </IonToolbar>
 
       <IonContent scrollY={true}>
