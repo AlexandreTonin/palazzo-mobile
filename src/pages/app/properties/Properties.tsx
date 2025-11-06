@@ -7,6 +7,7 @@ import {
   IonSearchbar,
   IonSpinner,
   IonToolbar,
+  useIonViewWillEnter,
 } from '@ionic/react';
 import './properties.css';
 import Header from '../../../components/layout/Header';
@@ -31,29 +32,33 @@ const Tab1: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
 
-  useEffect(() => {
-    const checkAuthAndFetchFavorites = async () => {
-      setLoadingFavorites(true);
-      try {
-        const { value: token } = await Preferences.get({
-          key: 'Palazzo.accessToken',
-        });
+  const fetchFavorites = async () => {
+    setLoadingFavorites(true);
+    try {
+      const { value: token } = await Preferences.get({
+        key: 'Palazzo.accessToken',
+      });
 
-        if (token) {
-          const favorites = await favoritesService.getAll();
-          const ids = favorites.map((fav) => fav.listingId);
-          setFavoriteIds(ids);
-        } else {
-          setFavoriteIds([]);
-        }
-      } catch {
+      if (token) {
+        const favorites = await favoritesService.getAll();
+        const ids = favorites.map((fav) => fav.listingId);
+        setFavoriteIds(ids);
+      } else {
         setFavoriteIds([]);
-      } finally {
-        setLoadingFavorites(false);
       }
-    };
+    } catch {
+      setFavoriteIds([]);
+    } finally {
+      setLoadingFavorites(false);
+    }
+  };
 
-    checkAuthAndFetchFavorites();
+  useIonViewWillEnter(() => {
+    fetchFavorites();
+  });
+
+  useEffect(() => {
+    fetchFavorites();
   }, []);
 
   useEffect(() => {
