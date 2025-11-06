@@ -6,7 +6,7 @@ export interface PropertyImage {
 export interface Property {
   id: number;
   title: string;
-  type: string;
+  type: 'house' | 'apartment' | 'penthouse' | 'loft';
   price: string;
   description: string;
   city: string;
@@ -31,4 +31,53 @@ export interface PropertiesResponse {
     totalItems: number;
     itemsPerPage: number;
   };
+}
+
+export interface PropertyFilters {
+  page?: number;
+  limit?: number;
+  type?: 'house' | 'apartment' | 'penthouse' | 'loft';
+  search?: string;
+  country?: string;
+  city?: string;
+  minBedrooms?: number;
+  minBathrooms?: number;
+  minSquareMeters?: number;
+  minPrice?: number;
+  maxPrice?: number;
+}
+
+export interface CreatePropertyData {
+  title: string;
+  type: 'house' | 'apartment' | 'penthouse' | 'loft';
+  price: string;
+  description: string;
+  city: string;
+  neighborhood: string;
+  region: string;
+  country: string;
+  bedrooms: number;
+  bathrooms: number;
+  squareMeters: number;
+  contactPhone: string;
+  contactEmail: string;
+  images: File[];
+}
+
+export interface UpdatePropertyData {
+  title?: string;
+  type?: 'house' | 'apartment' | 'penthouse' | 'loft';
+  price?: string;
+  description?: string;
+  city?: string;
+  neighborhood?: string;
+  region?: string;
+  country?: string;
+  bedrooms?: number;
+  bathrooms?: number;
+  squareMeters?: number;
+  contactPhone?: string;
+  contactEmail?: string;
+  images?: File[];
+  removeImages?: string[];
 }

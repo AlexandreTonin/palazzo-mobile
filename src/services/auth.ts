@@ -1,10 +1,20 @@
 import apiClient from './apiClient';
+import axios from 'axios';
 import { Preferences } from '@capacitor/preferences';
 import { SecureStoragePlugin } from 'capacitor-secure-storage-plugin';
-import axios from 'axios';
+import {
+  LoginCredentials,
+  RegisterData,
+  AuthResponse,
+  User,
+  UserProfile,
+} from '../types/user';
 
 const authService = {
-  login: async ({ email, password }: { email: string; password: string }) => {
+  login: async ({
+    email,
+    password,
+  }: LoginCredentials): Promise<AuthResponse> => {
     const response = await apiClient.post('/login', { email, password });
     const { accessToken, refreshToken } = response.data;
 
@@ -17,17 +27,24 @@ const authService = {
     return response.data;
   },
 
-  me: async () => {
+  register: async (data: RegisterData): Promise<User> => {
+    const response = await apiClient.post('/register', data);
+    return response.data;
+  },
+
+  me: async (): Promise<UserProfile> => {
     const response = await apiClient.get('/me');
     return response.data;
   },
 
-  logout: async () => {
+  logout: async (): Promise<void> => {
     await Preferences.remove({ key: 'Palazzo.accessToken' });
     await SecureStoragePlugin.remove({ key: 'Palazzo.refreshToken' });
   },
 
-  refreshToken: async (refreshToken: string) => {
+  refreshToken: async (
+    refreshToken: string
+  ): Promise<{ accessToken: string }> => {
     const response = await axios.post('/api/refresh', { refreshToken });
     const { accessToken } = response.data;
 
