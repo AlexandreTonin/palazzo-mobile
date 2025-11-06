@@ -6,15 +6,21 @@ import {
   IonSpinner,
   IonToolbar,
   useIonViewWillEnter,
+  IonButton,
+  IonBadge,
 } from '@ionic/react';
 import './likedProperties.css';
 import Header from '../../../components/layout/Header';
 import { useEffect, useState } from 'react';
 import PropertyCard from '../../../components/layout/properties/PropertyCard';
 import PropertyFilter from '../../../components/layout/properties/PropertyFilter';
+import AdvancedFiltersModal, {
+  FilterValues,
+} from '../../../components/layout/properties/AdvancedFiltersModal';
 import favoritesService from '../../../services/favorites';
 import { Property } from '../../../types/property';
 import { Preferences } from '@capacitor/preferences';
+import { SlidersHorizontal } from 'lucide-react';
 
 const Tab2: React.FC = () => {
   const [properties, setProperties] = useState<Property[]>([]);
@@ -27,6 +33,8 @@ const Tab2: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [favoriteIds, setFavoriteIds] = useState<number[]>([]);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
+  const [advancedFilters, setAdvancedFilters] = useState<FilterValues>({});
 
   const fetchFavorites = async () => {
     const { value: token } = await Preferences.get({
@@ -71,25 +79,57 @@ const Tab2: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    let filtered = [...properties];
+    const filtered = properties.filter((prop) => {
+      if (selectedType && prop.type !== selectedType) return false;
 
-    if (selectedType) {
-      filtered = filtered.filter((prop) => prop.type === selectedType);
-    }
-
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(
-        (prop) =>
+      if (searchQuery) {
+        const query = searchQuery.toLowerCase();
+        const matchesSearch =
           prop.title.toLowerCase().includes(query) ||
           prop.city.toLowerCase().includes(query) ||
           prop.neighborhood.toLowerCase().includes(query) ||
-          prop.description.toLowerCase().includes(query)
-      );
-    }
+          prop.description.toLowerCase().includes(query);
+        if (!matchesSearch) return false;
+      }
+
+      if (
+        advancedFilters.minPrice &&
+        Number(prop.price) < advancedFilters.minPrice
+      )
+        return false;
+      if (
+        advancedFilters.maxPrice &&
+        Number(prop.price) > advancedFilters.maxPrice
+      )
+        return false;
+      if (
+        advancedFilters.minBedrooms &&
+        prop.bedrooms < advancedFilters.minBedrooms
+      )
+        return false;
+      if (
+        advancedFilters.minBathrooms &&
+        prop.bathrooms < advancedFilters.minBathrooms
+      )
+        return false;
+      if (
+        advancedFilters.country &&
+        !prop.country
+          .toLowerCase()
+          .includes(advancedFilters.country.toLowerCase())
+      )
+        return false;
+      if (
+        advancedFilters.city &&
+        !prop.city.toLowerCase().includes(advancedFilters.city.toLowerCase())
+      )
+        return false;
+
+      return true;
+    });
 
     setFilteredProperties(filtered);
-  }, [properties, selectedType, searchQuery]);
+  }, [properties, selectedType, searchQuery, advancedFilters]);
 
   const handleFilterChange = (
     type?: 'house' | 'apartment' | 'penthouse' | 'loft'
@@ -110,6 +150,21 @@ const Tab2: React.FC = () => {
     }
   };
 
+  const handleApplyFilters = (filters: FilterValues) => {
+    setAdvancedFilters(filters);
+  };
+
+  const getActiveFiltersCount = () => {
+    let count = 0;
+    if (advancedFilters.minPrice) count++;
+    if (advancedFilters.maxPrice) count++;
+    if (advancedFilters.minBedrooms) count++;
+    if (advancedFilters.minBathrooms) count++;
+    if (advancedFilters.country) count++;
+    if (advancedFilters.city) count++;
+    return count;
+  };
+
   return (
     <IonPage>
       <div className="status-bar-bg"></div>
@@ -119,20 +174,84 @@ const Tab2: React.FC = () => {
       <IonToolbar style={{ padding: '0 8px' }}>
         <h1>Imóveis Curtidos</h1>
 
-        <IonSearchbar
-          placeholder="Pesquisar favoritos"
-          className="ion-no-padding ion-no-margin"
-          debounce={500}
-          value={searchQuery}
-          onIonInput={(e) => handleSearchChange(e.detail.value || '')}
-          onIonClear={() => handleSearchChange('')}
-        ></IonSearchbar>
+        <div
+          style={{
+            display: 'flex',
+            gap: 8,
+            alignItems: 'top',
+            marginBottom: '8px',
+            overflow: 'visible',
+          }}
+        >
+          <IonSearchbar
+            placeholder="Pesquisar favoritos"
+            className="ion-no-padding ion-no-margin"
+            debounce={500}
+            value={searchQuery}
+            onIonInput={(e) => handleSearchChange(e.detail.value || '')}
+            onIonClear={() => handleSearchChange('')}
+            style={{ flex: 1, '--min-height': '44px' }}
+          ></IonSearchbar>
+
+          <div style={{ position: 'relative', overflow: 'visible' }}>
+            <IonButton
+              fill="outline"
+              onClick={() => setIsFilterModalOpen(true)}
+              style={{
+                width: '44px',
+                height: '36px',
+                minHeight: 'auto',
+                position: 'relative',
+                margin: 0,
+                '--padding-start': '0',
+                '--padding-end': '0',
+                '--padding-top': '0',
+                '--padding-bottom': '0',
+                '--min-height': '36px',
+                '--height': '36px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                overflow: 'visible',
+              }}
+            >
+              <SlidersHorizontal size={20} />
+            </IonButton>
+            {getActiveFiltersCount() > 0 && (
+              <IonBadge
+                color="primary"
+                style={{
+                  position: 'absolute',
+                  top: '-8px',
+                  right: '-8px',
+                  fontSize: '11px',
+                  minWidth: '20px',
+                  height: '20px',
+                  borderRadius: '10px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  zIndex: 10,
+                }}
+              >
+                {getActiveFiltersCount()}
+              </IonBadge>
+            )}
+          </div>
+        </div>
 
         <PropertyFilter
           selectedType={selectedType}
           onFilterChange={handleFilterChange}
         />
       </IonToolbar>
+
+      <AdvancedFiltersModal
+        isOpen={isFilterModalOpen}
+        onClose={() => setIsFilterModalOpen(false)}
+        onApplyFilters={handleApplyFilters}
+        initialFilters={advancedFilters}
+      />
 
       <IonContent scrollY={true}>
         {!isAuthenticated && (
