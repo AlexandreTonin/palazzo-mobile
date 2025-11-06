@@ -1,41 +1,21 @@
 import {
-  IonBadge,
-  IonButton,
-  IonCard,
-  IonCardContent,
-  IonCardHeader,
-  IonCardSubtitle,
-  IonCardTitle,
   IonContent,
-  IonIcon,
-  IonItem,
   IonList,
   IonPage,
   IonSearchbar,
   IonSpinner,
   IonToolbar,
-} from "@ionic/react";
-import { home } from "ionicons/icons";
-import "./properties.css";
-import Header from "../../../components/layout/Header";
-import { useEffect, useState } from "react";
-import formatToBrl from "../../../utils/formatToBrl";
-import {
-  Bath,
-  Bed,
-  Building,
-  Building2,
-  Heart,
-  Home,
-  MapPin,
-  Pin,
-  Square,
-} from "lucide-react";
-import PropertyCard from "../../../components/layout/properties/PropertyCard";
-import PropertyFilter from "../../../components/layout/properties/PropertyFilter";
+} from '@ionic/react';
+import './properties.css';
+import Header from '../../../components/layout/Header';
+import { useEffect, useState } from 'react';
+import PropertyCard from '../../../components/layout/properties/PropertyCard';
+import PropertyFilter from '../../../components/layout/properties/PropertyFilter';
+import propertiesService from '../../../services/properties';
+import { Property } from '../../../types/property';
 
 const Tab1: React.FC = () => {
-  const [properties, setProperties] = useState([]);
+  const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -43,18 +23,9 @@ const Tab1: React.FC = () => {
     setLoading(true);
     setError(null);
 
-    try {
-      const response = await fetch("http://localhost:3000/listings/");
-      if (!response.ok) {
-        throw new Error("Failed to fetch properties");
-      }
-      const data = await response.json();
-      setProperties(data);
-    } catch (error: any) {
-      setError(error.message);
-    } finally {
-      setLoading(false);
-    }
+    const response = await propertiesService.getAll();
+    setProperties(response.data);
+    setLoading(false);
   };
 
   useEffect(() => {
@@ -67,7 +38,7 @@ const Tab1: React.FC = () => {
 
       <Header />
 
-      <IonToolbar style={{ padding: "0 8px" }}>
+      <IonToolbar style={{ padding: '0 8px' }}>
         <h1>Imóveis</h1>
 
         <IonSearchbar
@@ -88,9 +59,9 @@ const Tab1: React.FC = () => {
 
         <IonList
           lines="none"
-          style={{ paddingBlockEnd: "80px", paddingBlockStart: 0 }}
+          style={{ paddingBlockEnd: '80px', paddingBlockStart: 0 }}
         >
-          {properties.map((property: any) => (
+          {properties.map((property) => (
             <PropertyCard key={property.id} property={property} />
           ))}
         </IonList>

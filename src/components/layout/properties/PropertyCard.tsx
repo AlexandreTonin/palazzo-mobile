@@ -7,8 +7,13 @@ import {
 import { IonButton, IonCard } from "@ionic/react";
 import formatToBrl from "../../../utils/formatToBrl";
 import { Bath, Bed, Heart, MapPin, Square } from "lucide-react";
+import { Property } from "../../../types/property";
 
-const PropertyCard = ({ property }) => {
+interface PropertyCardProps {
+  property: Property;
+}
+
+const PropertyCard = ({ property }: PropertyCardProps) => {
   return (
     <IonCard
       style={{
@@ -18,9 +23,9 @@ const PropertyCard = ({ property }) => {
       }}
     >
       <img
-        alt="Silhouette of mountains"
+        alt={property.title}
         src={
-          // property.images[0].url ||
+          property.images[0]?.url ||
           "https://ionicframework.com/docs/img/demos/card-media.png"
         }
       />
