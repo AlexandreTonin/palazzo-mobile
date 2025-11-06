@@ -44,7 +44,9 @@ import '@ionic/react/css/display.css';
 import './theme/variables.css';
 import { Building, Heart, Phone } from 'lucide-react';
 
-setupIonicReact();
+setupIonicReact({
+  mode: 'ios',
+});
 
 const App: React.FC = () => (
   <IonApp>
