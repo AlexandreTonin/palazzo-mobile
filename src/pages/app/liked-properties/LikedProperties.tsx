@@ -8,6 +8,9 @@ import {
   useIonViewWillEnter,
   IonButton,
   IonBadge,
+  IonRefresher,
+  IonRefresherContent,
+  RefresherCustomEvent,
 } from "@ionic/react";
 import "./likedProperties.css";
 import Header from "../../../components/layout/Header";
@@ -34,6 +37,7 @@ const Tab2: React.FC = () => {
   const [favoriteIds, setFavoriteIds] = useState<number[]>([]);
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   const [advancedFilters, setAdvancedFilters] = useState<FilterValues>({});
+  const [refresh, setRefresh] = useState(false);
   const { isAuthenticated } = useAuth();
 
   const fetchFavorites = async () => {
@@ -70,7 +74,7 @@ const Tab2: React.FC = () => {
 
   useEffect(() => {
     fetchFavorites();
-  }, []);
+  }, [refresh]);
 
   useEffect(() => {
     const filtered = properties.filter((prop) => {
@@ -123,7 +127,7 @@ const Tab2: React.FC = () => {
     });
 
     setFilteredProperties(filtered);
-  }, [properties, selectedType, searchQuery, advancedFilters]);
+  }, [properties, selectedType, searchQuery, advancedFilters, refresh]);
 
   const handleFilterChange = (
     type?: "house" | "apartment" | "penthouse" | "loft"
@@ -158,6 +162,13 @@ const Tab2: React.FC = () => {
     if (advancedFilters.city) count++;
     return count;
   };
+
+  function handleRefresh(event: RefresherCustomEvent) {
+    setTimeout(() => {
+      setRefresh((prev) => !prev);
+      event.detail.complete();
+    }, 2000);
+  }
 
   return (
     <IonPage>
@@ -248,6 +259,10 @@ const Tab2: React.FC = () => {
       />
 
       <IonContent scrollY={true}>
+        <IonRefresher slot="fixed" onIonRefresh={handleRefresh}>
+          <IonRefresherContent></IonRefresherContent>
+        </IonRefresher>
+
         {!isAuthenticated && (
           <div style={{ padding: "20px", textAlign: "center" }}>
             <p>Faça login para ver seus imóveis favoritos</p>
