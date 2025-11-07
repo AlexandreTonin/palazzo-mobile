@@ -5,7 +5,7 @@ import {
   IonSpinner,
   useIonViewWillEnter,
 } from '@ionic/react';
-import './contact.css';
+import './location.css';
 import Header from '../../../components/layout/Header';
 import { useEffect, useState } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
@@ -15,8 +15,8 @@ import { Property } from '../../../types/property';
 import propertiesService from '../../../services/properties';
 import formatToBrl from '../../../utils/formatToBrl';
 import { Locate } from 'lucide-react';
+import PropertyPopup from '../../../components/layout/properties/PropertyPopup';
 
-// Configuração dos ícones do Leaflet
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 delete (L.Icon.Default.prototype as any)._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -28,7 +28,6 @@ L.Icon.Default.mergeOptions({
     'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
 });
 
-// Ícone customizado para propriedades
 const createPropertyIcon = (price: string) => {
   return L.divIcon({
     className: 'custom-property-marker',
@@ -40,7 +39,6 @@ const createPropertyIcon = (price: string) => {
   });
 };
 
-// Ícone para localização do usuário
 const userIcon = L.divIcon({
   className: 'user-location-marker',
   html: '<div class="user-marker-content">📍</div>',
@@ -48,7 +46,6 @@ const userIcon = L.divIcon({
   iconAnchor: [15, 15],
 });
 
-// Componente auxiliar para eventos do mapa
 function MapEvents({ onMove }: { onMove: (center: [number, number]) => void }) {
   const map = useMap();
 
@@ -67,7 +64,6 @@ function MapEvents({ onMove }: { onMove: (center: [number, number]) => void }) {
   return null;
 }
 
-// Componente para recentralizar o mapa
 function RecenterButton({ position }: { position: [number, number] }) {
   const map = useMap();
 
@@ -100,11 +96,8 @@ const Tab3: React.FC = () => {
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
   const [locationError, setLocationError] = useState<string | null>(null);
-  const [mapCenter, setMapCenter] = useState<[number, number]>([
-    -23.5505, -46.6333,
-  ]); // São Paulo default
+  const [mapCenter, setMapCenter] = useState<[number, number] | null>(null);
 
-  // Pede permissão de localização
   useEffect(() => {
     if ('geolocation' in navigator) {
       navigator.geolocation.getCurrentPosition(
@@ -122,16 +115,18 @@ const Tab3: React.FC = () => {
           setLocationError(
             'Não foi possível acessar sua localização. Mostrando São Paulo.'
           );
+          // Define São Paulo como fallback apenas se houver erro
+          setMapCenter([-23.5505, -46.6333]);
           setLoading(false);
         }
       );
     } else {
       setLocationError('Geolocalização não suportada neste dispositivo.');
+      setMapCenter([-23.5505, -46.6333]);
       setLoading(false);
     }
   }, []);
 
-  // Busca propriedades quando tem localização
   useIonViewWillEnter(() => {
     fetchProperties();
   });
@@ -139,7 +134,6 @@ const Tab3: React.FC = () => {
   const fetchProperties = async () => {
     setLoading(true);
     try {
-      // Busca todas as propriedades com coordenadas válidas
       const response = await propertiesService.getAll({ limit: 100 });
       const validProperties = (response.data || []).filter(
         (prop) => prop.latitude !== null && prop.longitude !== null
@@ -154,8 +148,6 @@ const Tab3: React.FC = () => {
 
   const handleMapMove = (center: [number, number]) => {
     setMapCenter(center);
-    // Pode adicionar debounce aqui se quiser buscar ao mover o mapa
-    // fetchProperties();
   };
 
   return (
@@ -179,7 +171,7 @@ const Tab3: React.FC = () => {
           </div>
         )}
 
-        {loading && !userLocation ? (
+        {loading && !mapCenter ? (
           <div
             style={{
               display: 'flex',
@@ -191,89 +183,49 @@ const Tab3: React.FC = () => {
             <IonSpinner name="crescent" />
           </div>
         ) : (
-          <div style={{ height: '100%', width: '100%' }}>
-            <MapContainer
-              center={mapCenter}
-              zoom={13}
-              style={{ height: '100%', width: '100%' }}
-              zoomControl={true}
-            >
-              <TileLayer
-                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-              />
+          mapCenter && (
+            <div style={{ height: '100%', width: '100%' }}>
+              <MapContainer
+                center={mapCenter}
+                zoom={13}
+                style={{ height: '100%', width: '100%' }}
+                zoomControl={true}
+              >
+                <TileLayer
+                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                />
 
-              {/* Marcador da localização do usuário */}
-              {userLocation && (
-                <Marker position={userLocation} icon={userIcon}>
-                  <Popup>
-                    <strong>Você está aqui</strong>
-                  </Popup>
-                </Marker>
-              )}
-
-              {/* Marcadores das propriedades */}
-              {properties.map((property) => {
-                if (property.latitude === null || property.longitude === null)
-                  return null;
-
-                return (
-                  <Marker
-                    key={property.id}
-                    position={[property.latitude, property.longitude]}
-                    icon={createPropertyIcon(property.price)}
-                  >
+                {userLocation && (
+                  <Marker position={userLocation} icon={userIcon}>
                     <Popup>
-                      <div style={{ minWidth: '200px' }}>
-                        {property.images[0] && (
-                          <img
-                            src={property.images[0].url}
-                            alt={property.title}
-                            style={{
-                              width: '100%',
-                              height: '120px',
-                              objectFit: 'cover',
-                              borderRadius: '8px',
-                              marginBottom: '8px',
-                            }}
-                          />
-                        )}
-                        <h4 style={{ margin: '0 0 4px 0', fontSize: '14px' }}>
-                          {property.title}
-                        </h4>
-                        <p
-                          style={{
-                            margin: '0 0 4px 0',
-                            fontSize: '16px',
-                            fontWeight: 'bold',
-                            color: 'var(--ion-color-primary)',
-                          }}
-                        >
-                          {formatToBrl(Number(property.price))}
-                        </p>
-                        <p
-                          style={{
-                            margin: '0',
-                            fontSize: '12px',
-                            color: '#666',
-                          }}
-                        >
-                          {property.neighborhood} - {property.city}
-                        </p>
-                        <p style={{ margin: '4px 0 0 0', fontSize: '12px' }}>
-                          🛏️ {property.bedrooms} • 🚿 {property.bathrooms} •{' '}
-                          {property.squareMeters}m²
-                        </p>
-                      </div>
+                      <strong>Você está aqui</strong>
                     </Popup>
                   </Marker>
-                );
-              })}
+                )}
 
-              <MapEvents onMove={handleMapMove} />
-              {userLocation && <RecenterButton position={userLocation} />}
-            </MapContainer>
-          </div>
+                {properties.map((property) => {
+                  if (property.latitude === null || property.longitude === null)
+                    return null;
+
+                  return (
+                    <Marker
+                      key={property.id}
+                      position={[property.latitude, property.longitude]}
+                      icon={createPropertyIcon(property.price)}
+                    >
+                      <Popup>
+                        <PropertyPopup property={property} />
+                      </Popup>
+                    </Marker>
+                  );
+                })}
+
+                <MapEvents onMove={handleMapMove} />
+                {userLocation && <RecenterButton position={userLocation} />}
+              </MapContainer>
+            </div>
+          )
         )}
       </IonContent>
     </IonPage>
