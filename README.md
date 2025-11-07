@@ -96,16 +96,13 @@ npx cap sync
 7. Open native IDE
 
 - Android
-```cmd
-npx cap open android
-```
   - Build/run from Android Studio (select emulator or device)
-  - Or from CLI: ```npx cap run android -l --external```
+  - Or from CLI:
+  ```cmd
+  npx cap run android -l --external
+  ```
 
 - iOS (macOS only)
-  ```cmd
-    npx cap open ios
-  ```
   - Build/run from Xcode (select simulator or device)
   ```cmd
   ionic capacitor run ios -l --external
