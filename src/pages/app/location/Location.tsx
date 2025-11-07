@@ -41,9 +41,19 @@ const createPropertyIcon = (price: string) => {
 
 const userIcon = L.divIcon({
   className: 'user-location-marker',
-  html: '<div class="user-marker-content">📍</div>',
-  iconSize: [30, 30],
-  iconAnchor: [15, 15],
+  html: `
+    <div class="user-marker-wrapper">
+      <div class="user-marker-aura"></div>
+      <div class="user-marker-dot">
+        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="#222" stroke="none">
+          <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/>
+          <circle cx="12" cy="10" r="3" fill="white"/>
+        </svg>
+      </div>
+    </div>
+  `,
+  iconSize: [50, 50],
+  iconAnchor: [25, 25],
 });
 
 function MapEvents({ onMove }: { onMove: (center: [number, number]) => void }) {
