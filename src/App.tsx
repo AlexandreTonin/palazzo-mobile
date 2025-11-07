@@ -55,7 +55,7 @@ const App: React.FC = () => (
       <IonReactRouter>
         <IonTabs>
           <IonRouterOutlet>
-            <Route exact path="/tab1">
+            <Route exact path="/properties">
               <Properties />
             </Route>
             <Route exact path="/login">
@@ -64,22 +64,26 @@ const App: React.FC = () => (
             <Route exact path="/register">
               <Register />
             </Route>
-            <Route exact path="/tab2">
+            <Route exact path="/properties/liked">
               <LikedProperties />
             </Route>
             <Route path="/tab3">
               <Contact />
             </Route>
             <Route exact path="/">
-              <Redirect to="/tab1" />
+              <Redirect to="/properties" />
             </Route>
           </IonRouterOutlet>
 
           <IonTabBar slot="bottom" className="tab-bar">
-            <IonTabButton tab="tab1" href="/tab1" className="tab-bar-tab">
+            <IonTabButton tab="tab1" href="/properties" className="tab-bar-tab">
               <Building size={20} />
             </IonTabButton>
-            <IonTabButton tab="tab2" href="/tab2" className="tab-bar-tab">
+            <IonTabButton
+              tab="tab2"
+              href="/properties/liked"
+              className="tab-bar-tab"
+            >
               <Heart size={20} />
             </IonTabButton>
             <IonTabButton tab="tab3" href="/tab3" className="tab-bar-tab">
