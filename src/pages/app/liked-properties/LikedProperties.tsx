@@ -8,19 +8,19 @@ import {
   useIonViewWillEnter,
   IonButton,
   IonBadge,
-} from '@ionic/react';
-import './likedProperties.css';
-import Header from '../../../components/layout/Header';
-import { useEffect, useState } from 'react';
-import PropertyCard from '../../../components/layout/properties/PropertyCard';
-import PropertyFilter from '../../../components/layout/properties/PropertyFilter';
+} from "@ionic/react";
+import "./likedProperties.css";
+import Header from "../../../components/layout/Header";
+import { useEffect, useState } from "react";
+import PropertyCard from "../../../components/layout/properties/PropertyCard";
+import PropertyFilter from "../../../components/layout/properties/PropertyFilter";
 import AdvancedFiltersModal, {
   FilterValues,
-} from '../../../components/layout/properties/AdvancedFiltersModal';
-import favoritesService from '../../../services/favorites';
-import { Property } from '../../../types/property';
-import { Preferences } from '@capacitor/preferences';
-import { SlidersHorizontal } from 'lucide-react';
+} from "../../../components/layout/properties/AdvancedFiltersModal";
+import favoritesService from "../../../services/favorites";
+import { Property } from "../../../types/property";
+import { SlidersHorizontal } from "lucide-react";
+import useAuth from "../../../hooks/useAuth";
 
 const Tab2: React.FC = () => {
   const [properties, setProperties] = useState<Property[]>([]);
@@ -28,28 +28,22 @@ const Tab2: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedType, setSelectedType] = useState<
-    'house' | 'apartment' | 'penthouse' | 'loft' | undefined
+    "house" | "apartment" | "penthouse" | "loft" | undefined
   >();
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
   const [favoriteIds, setFavoriteIds] = useState<number[]>([]);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   const [advancedFilters, setAdvancedFilters] = useState<FilterValues>({});
+  const { isAuthenticated } = useAuth();
 
   const fetchFavorites = async () => {
-    const { value: token } = await Preferences.get({
-      key: 'Palazzo.accessToken',
-    });
-
-    if (!token) {
-      setIsAuthenticated(false);
+    if (!isAuthenticated) {
       setProperties([]);
       setFilteredProperties([]);
       setFavoriteIds([]);
       return;
     }
 
-    setIsAuthenticated(true);
     setLoading(true);
     setError(null);
 
@@ -61,8 +55,8 @@ const Tab2: React.FC = () => {
       setProperties(favoriteProperties);
       setFavoriteIds(ids);
     } catch (err) {
-      console.error('Erro ao buscar favoritos:', err);
-      setError('Erro ao carregar imóveis favoritados');
+      console.error("Erro ao buscar favoritos:", err);
+      setError("Erro ao carregar imóveis favoritados");
       setProperties([]);
       setFavoriteIds([]);
     } finally {
@@ -132,7 +126,7 @@ const Tab2: React.FC = () => {
   }, [properties, selectedType, searchQuery, advancedFilters]);
 
   const handleFilterChange = (
-    type?: 'house' | 'apartment' | 'penthouse' | 'loft'
+    type?: "house" | "apartment" | "penthouse" | "loft"
   ) => {
     setSelectedType(type);
   };
@@ -171,16 +165,16 @@ const Tab2: React.FC = () => {
 
       <Header />
 
-      <IonToolbar style={{ padding: '0 8px' }}>
+      <IonToolbar style={{ padding: "0 8px" }}>
         <h1>Imóveis Curtidos</h1>
 
         <div
           style={{
-            display: 'flex',
+            display: "flex",
             gap: 8,
-            alignItems: 'top',
-            marginBottom: '8px',
-            overflow: 'visible',
+            alignItems: "top",
+            marginBottom: "8px",
+            overflow: "visible",
           }}
         >
           <IonSearchbar
@@ -188,31 +182,31 @@ const Tab2: React.FC = () => {
             className="ion-no-padding ion-no-margin"
             debounce={500}
             value={searchQuery}
-            onIonInput={(e) => handleSearchChange(e.detail.value || '')}
-            onIonClear={() => handleSearchChange('')}
-            style={{ flex: 1, '--min-height': '44px' }}
+            onIonInput={(e) => handleSearchChange(e.detail.value || "")}
+            onIonClear={() => handleSearchChange("")}
+            style={{ flex: 1, "--min-height": "44px" }}
           ></IonSearchbar>
 
-          <div style={{ position: 'relative', overflow: 'visible' }}>
+          <div style={{ position: "relative", overflow: "visible" }}>
             <IonButton
               fill="outline"
               onClick={() => setIsFilterModalOpen(true)}
               style={{
-                width: '44px',
-                height: '36px',
-                minHeight: 'auto',
-                position: 'relative',
+                width: "44px",
+                height: "36px",
+                minHeight: "auto",
+                position: "relative",
                 margin: 0,
-                '--padding-start': '0',
-                '--padding-end': '0',
-                '--padding-top': '0',
-                '--padding-bottom': '0',
-                '--min-height': '36px',
-                '--height': '36px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                overflow: 'visible',
+                "--padding-start": "0",
+                "--padding-end": "0",
+                "--padding-top": "0",
+                "--padding-bottom": "0",
+                "--min-height": "36px",
+                "--height": "36px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                overflow: "visible",
               }}
             >
               <SlidersHorizontal size={20} />
@@ -221,16 +215,16 @@ const Tab2: React.FC = () => {
               <IonBadge
                 color="primary"
                 style={{
-                  position: 'absolute',
-                  top: '-8px',
-                  right: '-8px',
-                  fontSize: '11px',
-                  minWidth: '20px',
-                  height: '20px',
-                  borderRadius: '10px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
+                  position: "absolute",
+                  top: "-8px",
+                  right: "-8px",
+                  fontSize: "11px",
+                  minWidth: "20px",
+                  height: "20px",
+                  borderRadius: "10px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
                   zIndex: 10,
                 }}
               >
@@ -255,7 +249,7 @@ const Tab2: React.FC = () => {
 
       <IonContent scrollY={true}>
         {!isAuthenticated && (
-          <div style={{ padding: '20px', textAlign: 'center' }}>
+          <div style={{ padding: "20px", textAlign: "center" }}>
             <p>Faça login para ver seus imóveis favoritos</p>
           </div>
         )}
@@ -264,11 +258,11 @@ const Tab2: React.FC = () => {
           filteredProperties.length === 0 &&
           !loading &&
           !error && (
-            <div style={{ padding: '20px', textAlign: 'center' }}>
+            <div style={{ padding: "20px", textAlign: "center" }}>
               <p>
                 {properties.length === 0
-                  ? 'Você ainda não favoritou nenhum imóvel'
-                  : 'Nenhum imóvel encontrado com os filtros selecionados'}
+                  ? "Você ainda não favoritou nenhum imóvel"
+                  : "Nenhum imóvel encontrado com os filtros selecionados"}
               </p>
             </div>
           )}
@@ -276,9 +270,9 @@ const Tab2: React.FC = () => {
         {loading && (
           <div
             style={{
-              display: 'flex',
-              justifyContent: 'center',
-              padding: '20px',
+              display: "flex",
+              justifyContent: "center",
+              padding: "20px",
             }}
           >
             <IonSpinner name="crescent" />
@@ -286,7 +280,7 @@ const Tab2: React.FC = () => {
         )}
 
         {error && (
-          <div style={{ padding: '20px', textAlign: 'center' }}>
+          <div style={{ padding: "20px", textAlign: "center" }}>
             <p>Erro ao carregar imóveis: {error}</p>
           </div>
         )}
@@ -294,7 +288,7 @@ const Tab2: React.FC = () => {
         {isAuthenticated && !loading && (
           <IonList
             lines="none"
-            style={{ paddingBlockEnd: '80px', paddingBlockStart: 0 }}
+            style={{ paddingBlockEnd: "80px", paddingBlockStart: 0 }}
           >
             {filteredProperties.map((property) => (
               <PropertyCard
