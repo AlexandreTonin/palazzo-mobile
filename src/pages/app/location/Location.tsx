@@ -74,17 +74,18 @@ function RecenterButton({ position }: { position: [number, number] }) {
       onClick={() => map.setView(position, 13)}
       style={{
         position: 'absolute',
-        bottom: '20px',
+        bottom: '32px',
         right: '20px',
         zIndex: 1000,
         borderRadius: '50%',
-        width: '50px',
-        height: '50px',
+        width: '48px',
+        height: '48px',
         '--padding-start': '0',
         '--padding-end': '0',
+        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.2)',
       }}
     >
-      <Locate size={24} />
+      <Locate size={22} />
     </IonButton>
   );
 }
