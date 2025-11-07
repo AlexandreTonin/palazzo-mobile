@@ -77,7 +77,7 @@ This project is set up with Capacitor. Typical workflow:
 
 1. Build the web assets
 ```cmd
-or: ionic build
+ionic build
 ```
 
 3. Add or update native platforms (only once per platform)
