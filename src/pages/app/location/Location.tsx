@@ -13,6 +13,8 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { Property } from '../../../types/property';
 import propertiesService from '../../../services/properties';
+import favoritesService from '../../../services/favorites';
+import { Preferences } from '@capacitor/preferences';
 import formatToBrl from '../../../utils/formatToBrl';
 import { Locate } from 'lucide-react';
 import PropertyPopup from '../../../components/layout/properties/PropertyPopup';
@@ -28,9 +30,11 @@ L.Icon.Default.mergeOptions({
     'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
 });
 
-const createPropertyIcon = (price: string) => {
+const createPropertyIcon = (price: string, isFavorited = false) => {
   return L.divIcon({
-    className: 'custom-property-marker',
+    className: isFavorited
+      ? 'custom-property-marker favorited'
+      : 'custom-property-marker',
     html: `<div class="property-marker-content">${formatToBrl(
       Number(price)
     )}</div>`,
@@ -108,6 +112,8 @@ const Tab3: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [locationError, setLocationError] = useState<string | null>(null);
   const [mapCenter, setMapCenter] = useState<[number, number] | null>(null);
+  const [favoriteIds, setFavoriteIds] = useState<number[]>([]);
+  const [favoritesVersion, setFavoritesVersion] = useState<number>(0);
 
   useEffect(() => {
     if ('geolocation' in navigator) {
@@ -126,7 +132,6 @@ const Tab3: React.FC = () => {
           setLocationError(
             'Não foi possível acessar sua localização. Mostrando São Paulo.'
           );
-          // Define São Paulo como fallback apenas se houver erro
           setMapCenter([-23.5505, -46.6333]);
           setLoading(false);
         }
@@ -141,6 +146,52 @@ const Tab3: React.FC = () => {
   useIonViewWillEnter(() => {
     fetchProperties();
   });
+
+  useEffect(() => {
+    const fetchFavorites = async () => {
+      try {
+        const { value: token } = await Preferences.get({
+          key: 'Palazzo.accessToken',
+        });
+        if (!token) {
+          setFavoriteIds([]);
+          return;
+        }
+
+        const favs = await favoritesService.getAll();
+        const ids = (favs || []).map((f) => f.listingId);
+        setFavoriteIds(ids);
+      } catch {
+        setFavoriteIds([]);
+      }
+    };
+
+    fetchFavorites();
+  }, []);
+
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent)?.detail;
+      if (!detail) return;
+      const { propertyId, isFavorited } = detail as {
+        propertyId: number;
+        isFavorited: boolean;
+      };
+
+      if (!propertyId) return;
+
+      setFavoritesVersion((v) => v + 1);
+      setFavoriteIds((prev) => {
+        if (isFavorited)
+          return prev.includes(propertyId) ? prev : [...prev, propertyId];
+        return prev.filter((id) => id !== propertyId);
+      });
+    };
+
+    window.addEventListener('favorites:changed', handler as EventListener);
+    return () =>
+      window.removeEventListener('favorites:changed', handler as EventListener);
+  }, []);
 
   const fetchProperties = async () => {
     setLoading(true);
@@ -223,10 +274,30 @@ const Tab3: React.FC = () => {
                     <Marker
                       key={property.id}
                       position={[property.latitude, property.longitude]}
-                      icon={createPropertyIcon(property.price)}
+                      icon={createPropertyIcon(
+                        property.price,
+                        favoriteIds.includes(property.id)
+                      )}
                     >
                       <Popup>
-                        <PropertyPopup property={property} />
+                        <PropertyPopup
+                          property={property}
+                          onFavoriteToggle={(propertyId, isFav) => {
+                            if (isFav) {
+                              setFavoriteIds((prev) =>
+                                prev.includes(propertyId)
+                                  ? prev
+                                  : [...prev, propertyId]
+                              );
+                            } else {
+                              setFavoriteIds((prev) =>
+                                prev.filter((id) => id !== propertyId)
+                              );
+                            }
+                            setFavoritesVersion((v) => v + 1);
+                          }}
+                          favoritesUpdatedAt={favoritesVersion}
+                        />
                       </Popup>
                     </Marker>
                   );

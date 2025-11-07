@@ -79,6 +79,32 @@ const Tab2: React.FC = () => {
   }, []);
 
   useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent)?.detail;
+      if (!detail) return;
+      const { propertyId, isFavorited } = detail as {
+        propertyId: number;
+        isFavorited: boolean;
+      };
+
+      if (!propertyId) return;
+
+      if (isFavorited) {
+        setFavoriteIds((prev) =>
+          prev.includes(propertyId) ? prev : [...prev, propertyId]
+        );
+      } else {
+        setProperties((prev) => prev.filter((prop) => prop.id !== propertyId));
+        setFavoriteIds((prev) => prev.filter((id) => id !== propertyId));
+      }
+    };
+
+    window.addEventListener('favorites:changed', handler as EventListener);
+    return () =>
+      window.removeEventListener('favorites:changed', handler as EventListener);
+  }, []);
+
+  useEffect(() => {
     const filtered = properties.filter((prop) => {
       if (selectedType && prop.type !== selectedType) return false;
 
@@ -147,6 +173,15 @@ const Tab2: React.FC = () => {
     } else {
       setProperties((prev) => prev.filter((prop) => prop.id !== propertyId));
       setFavoriteIds((prev) => prev.filter((id) => id !== propertyId));
+    }
+    try {
+      window.dispatchEvent(
+        new CustomEvent('favorites:changed', {
+          detail: { propertyId, isFavorited },
+        })
+      );
+    } catch {
+      /* ignore */
     }
   };
 
