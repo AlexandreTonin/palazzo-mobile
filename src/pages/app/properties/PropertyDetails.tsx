@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import {
   IonPage,
   IonHeader,
@@ -35,6 +35,50 @@ const PropertyDetails: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [favorited, setFavorited] = useState(false);
   const [favLoading, setFavLoading] = useState(false);
+  const [currentImage, setCurrentImage] = useState(0);
+  const touchStartX = useRef<number | null>(null);
+  const touchEndX = useRef<number | null>(null);
+
+  useEffect(() => {
+    setCurrentImage(0);
+  }, [property?.id]);
+
+  const images = property?.images || [];
+
+  const prevImage = () => {
+    if (images.length === 0) return;
+    setCurrentImage((i) => (i - 1 + images.length) % images.length);
+  };
+
+  const nextImage = () => {
+    if (images.length === 0) return;
+    setCurrentImage((i) => (i + 1) % images.length);
+  };
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+  };
+
+  const onTouchMove = (e: React.TouchEvent) => {
+    touchEndX.current = e.touches[0].clientX;
+  };
+
+  const onTouchEnd = () => {
+    if (
+      touchStartX.current !== null &&
+      touchEndX.current !== null &&
+      Math.abs(touchStartX.current - touchEndX.current) > 50
+    ) {
+      if (touchStartX.current > touchEndX.current) {
+        nextImage();
+      } else {
+        prevImage();
+      }
+    }
+
+    touchStartX.current = null;
+    touchEndX.current = null;
+  };
 
   useEffect(() => {
     const fetch = async () => {
@@ -156,13 +200,7 @@ const PropertyDetails: React.FC = () => {
       </IonPage>
     );
   }
-
-  const mainImage =
-    property.images && property.images.length > 0
-      ? property.images[0].url
-      : undefined;
-
-  return (
+    return (
     <IonPage style={{ padding: "0 0 100px 0px" }}>
       <IonHeader>
         <IonToolbar>
@@ -181,13 +219,95 @@ const PropertyDetails: React.FC = () => {
           marginBottom: 64,
         }}
       >
-        {mainImage && (
-          <div style={{ width: "100%", height: 280, overflow: "hidden" }}>
+        {images && images.length > 0 && (
+          <div
+            style={{ position: "relative", width: "100%", height: 280, overflow: "hidden" }}
+            onTouchStart={onTouchStart}
+            onTouchMove={onTouchMove}
+            onTouchEnd={onTouchEnd}
+          >
             <img
-              src={mainImage}
+              src={images[currentImage].url}
               alt={property.title}
               style={{ width: "100%", height: "100%", objectFit: "cover" }}
             />
+
+            {images.length > 1 && (
+              <>
+                <button
+                  onClick={prevImage}
+                  aria-label="Anterior"
+                  style={{
+                    position: "absolute",
+                    left: 8,
+                    top: "50%",
+                    transform: "translateY(-50%)",
+                    background: "rgba(0,0,0,0.35)",
+                    color: "white",
+                    border: "none",
+                    borderRadius: 20,
+                    width: 36,
+                    height: 36,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    cursor: "pointer",
+                  }}
+                >
+                  ‹
+                </button>
+                <button
+                  onClick={nextImage}
+                  aria-label="Próxima"
+                  style={{
+                    position: "absolute",
+                    right: 8,
+                    top: "50%",
+                    transform: "translateY(-50%)",
+                    background: "rgba(0,0,0,0.35)",
+                    color: "white",
+                    border: "none",
+                    borderRadius: 20,
+                    width: 36,
+                    height: 36,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    cursor: "pointer",
+                  }}
+                >
+                  ›
+                </button>
+
+                <div
+                  style={{
+                    position: "absolute",
+                    bottom: 8,
+                    left: "50%",
+                    transform: "translateX(-50%)",
+                    display: "flex",
+                    gap: 6,
+                  }}
+                >
+                  {images.map((_, i) => (
+                    <button
+                      key={i}
+                      onClick={() => setCurrentImage(i)}
+                      aria-label={`Ir para imagem ${i + 1}`}
+                      style={{
+                        width: 8,
+                        height: 8,
+                        borderRadius: 8,
+                        background: i === currentImage ? "white" : "rgba(255,255,255,0.6)",
+                        border: "none",
+                        padding: 0,
+                        cursor: "pointer",
+                      }}
+                    />
+                  ))}
+                </div>
+              </>
+            )}
           </div>
         )}
 
