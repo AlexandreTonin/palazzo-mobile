@@ -6,7 +6,7 @@ export interface PropertyImage {
 export interface Property {
   id: number;
   title: string;
-  type: 'house' | 'apartment' | 'penthouse' | 'loft';
+  type: "house" | "apartment" | "penthouse" | "loft";
   price: string;
   description: string;
   city: string;
@@ -45,7 +45,7 @@ export interface PropertiesResponse {
 export interface PropertyFilters {
   page?: number;
   limit?: number;
-  type?: 'house' | 'apartment' | 'penthouse' | 'loft';
+  type?: "house" | "apartment" | "penthouse" | "loft";
   search?: string;
   country?: string;
   city?: string;
@@ -58,7 +58,7 @@ export interface PropertyFilters {
 
 export interface CreatePropertyData {
   title: string;
-  type: 'house' | 'apartment' | 'penthouse' | 'loft';
+  type: "house" | "apartment" | "penthouse" | "loft";
   price: string;
   description: string;
   city: string;
@@ -75,7 +75,7 @@ export interface CreatePropertyData {
 
 export interface UpdatePropertyData {
   title?: string;
-  type?: 'house' | 'apartment' | 'penthouse' | 'loft';
+  type?: "house" | "apartment" | "penthouse" | "loft";
   price?: string;
   description?: string;
   city?: string;
@@ -89,4 +89,19 @@ export interface UpdatePropertyData {
   contactEmail?: string;
   images?: File[];
   removeImages?: string[];
+}
+
+export function getPropertyTypeName(type: string): string {
+  switch (type) {
+    case "house":
+      return "Casa";
+    case "apartment":
+      return "Apartamento";
+    case "penthouse":
+      return "Cobertura";
+    case "loft":
+      return "Loft";
+    default:
+      return "Desconhecido";
+  }
 }

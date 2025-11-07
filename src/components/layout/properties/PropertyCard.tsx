@@ -4,13 +4,14 @@ import {
   IonCardSubtitle,
   IonCardTitle,
   useIonToast,
-} from '@ionic/react';
-import { IonButton, IonCard } from '@ionic/react';
-import formatToBrl from '../../../utils/formatToBrl';
-import { Bath, Bed, Heart, MapPin, Square } from 'lucide-react';
-import { Property } from '../../../types/property';
-import { useState, useEffect } from 'react';
-import favoritesService from '../../../services/favorites';
+} from "@ionic/react";
+import { IonButton, IonCard } from "@ionic/react";
+import formatToBrl from "../../../utils/formatToBrl";
+import { Bath, Bed, Heart, MapPin, Square } from "lucide-react";
+import { Property } from "../../../types/property";
+import { useState, useEffect } from "react";
+import favoritesService from "../../../services/favorites";
+import { useHistory } from "react-router";
 
 interface PropertyCardProps {
   property: Property;
@@ -26,6 +27,7 @@ const PropertyCard = ({
   const [loading, setLoading] = useState(false);
   const [favorited, setFavorited] = useState(initialIsFavorited);
   const [presentToast] = useIonToast();
+  const history = useHistory();
 
   useEffect(() => {
     setFavorited(initialIsFavorited);
@@ -41,10 +43,10 @@ const PropertyCard = ({
         onFavoriteToggle?.(property.id, false);
 
         presentToast({
-          message: 'Removido dos favoritos',
+          message: "Removido dos favoritos",
           duration: 2000,
-          color: 'medium',
-          position: 'bottom',
+          color: "medium",
+          position: "bottom",
         });
       } else {
         await favoritesService.add(property.id);
@@ -52,10 +54,10 @@ const PropertyCard = ({
         onFavoriteToggle?.(property.id, true);
 
         presentToast({
-          message: 'Adicionado aos favoritos',
+          message: "Adicionado aos favoritos",
           duration: 2000,
-          color: 'success',
-          position: 'bottom',
+          color: "success",
+          position: "bottom",
         });
       }
     } catch (error) {
@@ -74,23 +76,23 @@ const PropertyCard = ({
       const isAuthError =
         !status ||
         status === 401 ||
-        message.includes('does not exist') ||
-        message.includes('No refresh token') ||
-        message.includes('Unauthorized');
+        message.includes("does not exist") ||
+        message.includes("No refresh token") ||
+        message.includes("Unauthorized");
 
       if (isAuthError) {
         presentToast({
-          message: 'Faça login para favoritar imóveis',
+          message: "Faça login para favoritar imóveis",
           duration: 3000,
-          color: 'warning',
-          position: 'bottom',
+          color: "warning",
+          position: "bottom",
         });
       } else {
         presentToast({
-          message: 'Erro ao favoritar. Tente novamente.',
+          message: "Erro ao favoritar. Tente novamente.",
           duration: 2000,
-          color: 'danger',
-          position: 'bottom',
+          color: "danger",
+          position: "bottom",
         });
       }
     } finally {
@@ -103,14 +105,14 @@ const PropertyCard = ({
       style={{
         paddingBlockStart: 0,
         marginBlockStart: 8,
-        position: 'relative',
+        position: "relative",
       }}
     >
       <img
         alt={property.title}
         src={
           property.images[0]?.url ||
-          'https://ionicframework.com/docs/img/demos/card-media.png'
+          "https://ionicframework.com/docs/img/demos/card-media.png"
         }
       />
       <IonCardHeader>
@@ -147,7 +149,11 @@ const PropertyCard = ({
           </span>
         </div>
 
-        <IonButton color="tertiary" style={{ width: '100%' }}>
+        <IonButton
+          color="tertiary"
+          style={{ width: "100%" }}
+          onClick={() => history.push(`/property/${property.id}`)}
+        >
           Ver detalhes
         </IonButton>
       </IonCardContent>
@@ -159,15 +165,15 @@ const PropertyCard = ({
         disabled={loading}
         onClick={handleFavoriteToggle}
         style={{
-          position: 'absolute',
+          position: "absolute",
           top: 8,
           right: 8,
         }}
       >
         <Heart
           size={16}
-          fill={favorited ? 'red' : 'none'}
-          color={favorited ? 'red' : 'currentColor'}
+          fill={favorited ? "red" : "none"}
+          color={favorited ? "red" : "currentColor"}
         />
       </IonButton>
     </IonCard>

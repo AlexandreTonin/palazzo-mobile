@@ -14,6 +14,7 @@ import Contact from "./pages/app/contact/Contact";
 import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
 import Profile from "./pages/app/profile/Profile";
+import PropertyDetails from "./pages/app/properties/PropertyDetails";
 import "./globals.css";
 
 /* Core CSS required for Ionic components to work properly */
@@ -67,6 +68,9 @@ const App: React.FC = () => (
             </Route>
             <Route exact path="/profile">
               <Profile />
+            </Route>
+            <Route exact path="/property/:id">
+              <PropertyDetails />
             </Route>
             <Route exact path="/properties/liked">
               <LikedProperties />
