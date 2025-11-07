@@ -1,0 +1,34 @@
+.auth-page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.auth-box {
+  width: 100%;
+  max-width: 420px;
+  background: var(--ion-background-color);
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+}
+
+.auth-title {
+  margin: 0 0 12px 0;
+  text-align: center;
+}
+
+.actions {
+  margin-top: 12px;
+}
+
+.auth-footer {
+  margin-top: 16px;
+  text-align: center;
+  color: var(--ion-color-medium);
+}
+
+.auth-footer a {
+  color: var(--ion-color-primary);
+  text-decoration: none;
+}
