@@ -10,7 +10,7 @@ import {
 import { IonReactRouter } from "@ionic/react-router";
 import Properties from "./pages/app/properties/Properties";
 import LikedProperties from "./pages/app/liked-properties/LikedProperties";
-import Contact from "./pages/app/contact/Contact";
+import Location from './pages/app/location/Location';
 import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
 import Profile from "./pages/app/profile/Profile";
@@ -45,10 +45,12 @@ import "@ionic/react/css/display.css";
 
 /* Theme variables */
 import "./theme/variables.css";
-import { Building, Heart, Phone } from "lucide-react";
+import { Building, Heart, Map } from "lucide-react";
 import { AuthProvider } from "./contexts/AuthContext";
 
-setupIonicReact();
+setupIonicReact({
+  mode: 'ios',
+});
 
 const App: React.FC = () => (
   <AuthProvider>
@@ -71,8 +73,8 @@ const App: React.FC = () => (
             <Route exact path="/properties/liked">
               <LikedProperties />
             </Route>
-            <Route path="/tab3">
-              <Contact />
+            <Route path="/location">
+              <Location />
             </Route>
             <Route exact path="/">
               <Redirect to="/properties" />
@@ -90,8 +92,8 @@ const App: React.FC = () => (
             >
               <Heart size={20} />
             </IonTabButton>
-            <IonTabButton tab="tab3" href="/tab3" className="tab-bar-tab">
-              <Phone size={20} />
+            <IonTabButton tab="tab3" href="/location" className="tab-bar-tab">
+              <Map size={20} />
             </IonTabButton>
           </IonTabBar>
         </IonTabs>

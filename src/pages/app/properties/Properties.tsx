@@ -74,6 +74,31 @@ const Tab1: React.FC = () => {
   }, []);
 
   useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent)?.detail;
+      if (!detail) return;
+      const { propertyId, isFavorited } = detail as {
+        propertyId: number;
+        isFavorited: boolean;
+      };
+
+      if (!propertyId) return;
+
+      if (isFavorited) {
+        setFavoriteIds((prev) =>
+          prev.includes(propertyId) ? prev : [...prev, propertyId]
+        );
+      } else {
+        setFavoriteIds((prev) => prev.filter((id) => id !== propertyId));
+      }
+    };
+
+    window.addEventListener('favorites:changed', handler as EventListener);
+    return () =>
+      window.removeEventListener('favorites:changed', handler as EventListener);
+  }, []);
+
+  useEffect(() => {
     const fetchProperties = async () => {
       setLoading(true);
       setError(null);
@@ -119,6 +144,15 @@ const Tab1: React.FC = () => {
       setFavoriteIds((prev) => [...prev, propertyId]);
     } else {
       setFavoriteIds((prev) => prev.filter((id) => id !== propertyId));
+    }
+    try {
+      window.dispatchEvent(
+        new CustomEvent('favorites:changed', {
+          detail: { propertyId, isFavorited },
+        })
+      );
+    } catch {
+      /* ignore */
     }
   };
 
