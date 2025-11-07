@@ -37,7 +37,7 @@ const Login: React.FC = () => {
       await login({ email, password });
       setLoading(false);
       // Navigate to main tab
-      history.push("/tab1");
+      history.push("/properties");
     } catch (err: unknown) {
       console.error("Login error", err);
       let message = "Erro ao efetuar login";
